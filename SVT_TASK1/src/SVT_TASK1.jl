@@ -50,8 +50,9 @@ end
 function get_solution(N::Int64, a::T, b::T) where T<:AbstractFloat
     f = get_f(N)
     h = 1.0 / N
-    f[1] += a / h^2
-    f[end] += b / h^2
+    f .*= h^2
+    f[1] += a
+    f[end] += b
     u_inner = tridiag_algorithm(f)
     u_full = zeros(T, N + 1)
     u_full[1] = a
@@ -88,13 +89,13 @@ function convergence_study(N_values::Vector{Int}, a::Float64, b::Float64)
         title="Convergence of finite difference scheme")
     plot!(hs, C_errors,
         marker=:square, label="C (max) error")
-
-    display(plot!())
+    plot!(hs, hs .^ 2,
+        linestyle=:dash, label="O(h²)", linewidth=2)
     savefig("convergence.png")
     return (L2_errors, C_errors, hs)
 end
 
-N_list = [10, 20, 40, 80, 160, 320]
+N_list = 2 .^ range(1, 13)
 a = 0.0
 b = sin(4) * cos(3)
 convergence_study(N_list, a, b)
